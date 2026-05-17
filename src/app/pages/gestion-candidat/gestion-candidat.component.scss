@@ -1,0 +1,10 @@
+// Masque complètement le backdrop des modals
+::ng-deep .modal-backdrop {
+  display: none !important;
+}
+
+// Alternative : rendre le backdrop transparent
+// ::ng-deep .modal-backdrop {
+//   background-color: transparent !important;
+//   opacity: 0 !important;
+// }

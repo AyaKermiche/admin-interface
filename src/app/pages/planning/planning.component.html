@@ -1,0 +1,246 @@
+<div class="container-fluid mt-4">
+  <div class="card shadow-sm border-0 rounded-4 p-3 mb-4 bg-white">
+    <div class="d-flex justify-content-between align-items-center">
+      <div class="d-flex align-items-center gap-3">
+        <button class="btn btn-outline-primary rounded-circle shadow-sm" (click)="prevWeek()">
+          <i class="bi bi-chevron-left"></i>
+        </button>
+        <h5 class="fw-bold m-0 text-dark">
+          Semaine du {{ joursDates[0] | date:'dd/MM' }} au {{ joursDates[6] | date:'dd/MM/yyyy' }}
+        </h5>
+        <button class="btn btn-outline-primary rounded-circle shadow-sm" (click)="nextWeek()">
+          <i class="bi bi-chevron-right"></i>
+        </button>
+      </div>
+      
+      <div class="d-flex align-items-center gap-2">
+        <span class="small fw-bold text-muted text-uppercase">Aller à :</span>
+        <input type="date" class="form-control border-2 shadow-sm" 
+               [ngModel]="currentDate | date:'yyyy-MM-dd'" 
+               (change)="onDateChange($event)"
+               style="width: 160px;">
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-md-3">
+      <div class="card shadow-sm border-0 p-4 rounded-4 bg-white mb-4">
+        <div class="mb-4">
+          <label class="form-label small fw-bold text-muted text-uppercase">Candidat</label>
+          <div class="input-group">
+            <span class="input-group-text bg-light border-2 border-end-0"><i class="bi bi-person"></i></span>
+            <input type="text" class="form-control border-2 border-start-0 shadow-sm" 
+                   [(ngModel)]="candidateSearchText" 
+                   (input)="onCandidateSelect()" 
+                   list="candidateList" 
+                   placeholder="Nom du candidat...">
+          </div>
+          <datalist id="candidateList">
+            <option *ngFor="let c of allCandidates" [value]="getDisplayName(c)"></option>
+          </datalist>
+        </div>
+
+        <div class="mb-2">
+          <label class="form-label small fw-bold text-muted text-uppercase">Moniteur</label>
+          <div class="input-group">
+            <span class="input-group-text bg-light border-2 border-end-0"><i class="bi bi-person-badge"></i></span>
+            <input type="text" class="form-control border-2 border-start-0 shadow-sm" 
+                   [(ngModel)]="instructorSearchText" 
+                   (input)="onInstructorSelect()" 
+                   list="instructorList" 
+                   placeholder="Nom du moniteur...">
+          </div>
+          <datalist id="instructorList">
+            <option *ngFor="let m of allInstructors" [value]="getDisplayName(m)"></option>
+          </datalist>
+        </div>
+      </div>
+
+      <div class="card shadow-sm border-0 p-3 rounded-4 bg-white">
+        <h6 class="fw-bold small text-uppercase mb-3 text-muted">Légende Planning</h6>
+        <div class="d-flex align-items-center mb-2">
+          <div class="rounded-circle me-2" style="width: 12px; height: 12px; background-color: #003d82;"></div>
+          <span class="small">Code (Bleu)</span>
+        </div>
+        <div class="d-flex align-items-center mb-2">
+          <div class="rounded-circle me-2" style="width: 12px; height: 12px; background-color: #856404;"></div>
+          <span class="small">Conduite (Jaune)</span>
+        </div>
+        <div class="d-flex align-items-center mb-2">
+          <div class="rounded-circle me-2" style="width: 12px; height: 12px; background-color: #155724;"></div>
+          <span class="small">Créneau (Vert)</span>
+        </div>
+        <div class="d-flex align-items-center mb-2">
+          <div class="rounded-circle me-2" style="width: 12px; height: 12px; background-color: #ff7f27;"></div>
+          <span class="small">Séance Réservée (Orange)</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-9">
+      <div class="card shadow-sm border-0 rounded-4 overflow-hidden bg-white">
+        <div class="d-flex border-bottom bg-light">
+          <div style="width: 60px;"></div>
+          <div *ngFor="let jour of jours" 
+               class="flex-fill text-center py-3 fw-bold border-start small text-uppercase text-secondary">
+            {{ jour }}
+          </div>
+        </div>
+
+        <div class="d-flex position-relative" style="height: 720px; overflow-y: auto;">
+          <div style="width: 60px;" class="bg-light border-end">
+            <div *ngFor="let h of heures" style="height: 60px;" 
+                 class="text-center small text-muted pt-2 border-bottom fw-bold">
+              {{ h }}h
+            </div>
+          </div>
+
+          <div class="d-flex flex-fill">
+            <div *ngFor="let jourLabel of jours" 
+                 class="flex-fill border-start position-relative"
+                 style="background-image: linear-gradient(to bottom, #e9ecef 1px, transparent 1px); background-size: 100% 60px;">
+              
+              <div *ngFor="let plan of getFilteredSchedulesForDay(jourLabel)" 
+                   class="position-absolute"
+                   [ngClass]="getScheduleColorClass(plan.typeWork)"
+                   [ngStyle]="getScheduleStyles(plan)"
+                   (click)="handleSlotClick(plan, jourLabel)"
+                   style="cursor: pointer; left: 0; width: 100%; z-index: 5;">
+              </div>
+
+              <div *ngFor="let s of getFilteredSessionsForDay(jourLabel)" 
+                   class="session-event shadow-sm position-absolute rounded-2 p-2 text-white"
+                   [ngStyle]="getEventStyles(s)"
+                   (click)="onSessionClick(s)"
+                   style="z-index: 100; cursor: pointer; overflow: hidden; border-left: 4px solid rgba(255,255,255,0.4); background-color: #ff7f27;">
+                <div class="fw-bold text-truncate" style="font-size: 0.75rem;">
+                  {{ getCandidateName(s) }}
+                </div>
+                <div class="small opacity-75 text-capitalize text-truncate" style="font-size: 0.65rem;">
+                  {{ s.typeSession || s.type_session }}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="reservationModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow-lg rounded-4">
+      <div class="modal-header bg-dark text-white">
+        <h5 class="modal-title fw-bold">Nouvelle Réservation</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body p-4">
+        <div class="mb-3">
+          <label class="form-label small fw-bold text-muted text-uppercase">Candidat</label>
+          <input type="text" class="form-control border-2 bg-light shadow-sm" [value]="sessionForm.candidate_name" readonly>
+        </div>
+        <div class="row mb-3">
+          <div class="col">
+            <label class="form-label small fw-bold text-muted text-uppercase">Début</label>
+            <input type="datetime-local" class="form-control border-2 shadow-sm" [(ngModel)]="sessionForm.startTime">
+          </div>
+          <div class="col">
+            <label class="form-label small fw-bold text-muted text-uppercase">Fin</label>
+            <input type="datetime-local" class="form-control border-2 shadow-sm" [(ngModel)]="sessionForm.endTime">
+          </div>
+        </div>
+        <div class="mb-3">
+          <label class="form-label small fw-bold text-muted text-uppercase">Type de Séance</label>
+          <input type="text" class="form-control border-2 shadow-sm" [value]="sessionForm.typeSession | titlecase" readonly>
+        </div>
+      </div>
+      <div class="modal-footer border-0">
+        <button type="button" class="btn btn-light fw-bold" data-bs-dismiss="modal">Annuler</button>
+        <button type="button" class="btn btn-dark fw-bold px-4" (click)="saveSession()">Confirmer</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="detailsModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow rounded-4">
+      <div class="modal-header bg-dark text-white rounded-top-4">
+        <h5 class="modal-title fw-bold">Gestion de la Séance</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body p-4" *ngIf="selectedSession">
+        
+        <div *ngIf="!isEditMode">
+          <div class="mb-3">
+            <label class="small text-muted fw-bold text-uppercase">Candidat</label>
+            <p class="fs-5 fw-bold mb-0 text-primary">{{ getCandidateName(selectedSession) }}</p>
+          </div>
+          
+          <div class="row bg-light p-3 rounded-3 mb-3">
+            <div class="col">
+              <label class="small text-muted fw-bold text-uppercase">Heure Début</label>
+              <p class="mb-0 fw-bold">{{ selectedSession.startTime | date:'HH:mm' }}</p>
+            </div>
+            <div class="col">
+              <label class="small text-muted fw-bold text-uppercase">Heure Fin</label>
+              <p class="mb-0 fw-bold">{{ selectedSession.endTime | date:'HH:mm' }}</p>
+            </div>
+          </div>
+
+          <div class="mb-2">
+            <label class="small text-muted fw-bold text-uppercase">Type de Séance</label>
+            <p class="mb-0 text-capitalize"><i class="bi bi-tag-fill me-2"></i>{{ selectedSession.typeSession }}</p>
+          </div>
+        </div>
+
+        <div *ngIf="isEditMode">
+          <div class="mb-3">
+            <label class="form-label small fw-bold">Modifier l'heure de début</label>
+            <input type="datetime-local" class="form-control border-2" [(ngModel)]="selectedSession.startTime">
+          </div>
+          <div class="mb-3">
+            <label class="form-label small fw-bold">Modifier l'heure de fin</label>
+            <input type="datetime-local" class="form-control border-2" [(ngModel)]="selectedSession.endTime">
+          </div>
+        </div>
+
+      </div>
+      <div class="modal-footer border-0 d-flex justify-content-between p-3">
+        <button type="button" class="btn btn-outline-danger fw-bold" (click)="deleteSessionConfirm()">
+          <i class="bi bi-trash me-2"></i>Supprimer
+        </button>
+        <div>
+          <button *ngIf="!isEditMode" type="button" class="btn btn-primary fw-bold px-4" (click)="isEditMode = true">
+            <i class="bi bi-pencil me-2"></i>Modifier
+          </button>
+          <button *ngIf="isEditMode" type="button" class="btn btn-success fw-bold px-4" (click)="updateSession()">
+            Enregistrer
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="confirmDeleteModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow rounded-4">
+      <div class="modal-header border-0 justify-content-center pt-4">
+        <div class="bg-danger rounded-circle d-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+          <i class="bi bi-trash-fill text-white fs-4"></i>
+        </div>
+      </div>
+      <div class="modal-body text-center px-4 pb-4">
+        <h5 class="fw-bold mb-2">Supprimer cette séance ?</h5>
+        <p class="text-muted mb-4">Cette action est définitive.</p>
+        <div class="d-flex justify-content-center gap-3">
+          <button type="button" class="btn btn-outline-secondary px-4" data-bs-dismiss="modal">Non</button>
+          <button type="button" class="btn btn-danger px-4" (click)="deleteSession()">Confirmer</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,63 @@
+<div class="d-flex flex-column p-2 bg-light border-end vh-100 shadow-sm position-sticky top-0"
+     [class.collapsed]="isCollapsed">
+  
+  <div class="d-flex align-items-center mb-4 pb-3 border-bottom px-2 justify-content-between">
+    <span class="fw-bold fs-5 text-uppercase text-primary" *ngIf="!isCollapsed">Menu</span>
+    <button (click)="toggleSidebar()" class="btn border-0 p-1 text-dark">
+      <i class="bi bi-list fs-3"></i>
+    </button>
+  </div>
+
+  <ul class="nav nav-pills flex-column mb-auto">
+    <li class="nav-item mb-1">
+      <a [routerLink]="['/home']" routerLinkActive="active" class="nav-link text-dark d-flex align-items-center py-2 px-3">
+        <i class="bi bi-house-door fs-5"></i>
+        <span class="ms-3 fw-medium" *ngIf="!isCollapsed">Home</span>
+      </a>
+    </li>
+
+    <li class="nav-item mb-1">
+      <a [routerLink]="['/candidats']" routerLinkActive="active" class="nav-link text-dark d-flex align-items-center py-2 px-3">
+        <i class="bi bi-people fs-5"></i>
+        <span class="ms-3 fw-medium" *ngIf="!isCollapsed">Candidat</span>
+      </a>
+    </li>
+
+    <li class="nav-item mb-1">
+      <a [routerLink]="['/employes']" routerLinkActive="active" class="nav-link text-dark d-flex align-items-center py-2 px-3">
+        <i class="bi bi-person-badge fs-5"></i>
+        <span class="ms-3 fw-medium" *ngIf="!isCollapsed">Employé</span>
+      </a>
+    </li>
+
+    <li class="nav-item mb-1">
+      <a [routerLink]="['/planning']" routerLinkActive="active" class="nav-link text-dark d-flex align-items-center py-2 px-3">
+        <i class="bi bi-calendar4-event fs-5"></i>
+        <span class="ms-3 fw-medium" *ngIf="!isCollapsed">Planning</span>
+      </a>
+    </li>
+
+    <li class="nav-item mb-1">
+      <a [routerLink]="['/paiement']" routerLinkActive="active" class="nav-link text-dark d-flex align-items-center py-2 px-3">
+        <i class="bi bi-credit-card fs-5"></i>
+        <span class="ms-3 fw-medium" *ngIf="!isCollapsed">Paiement</span>
+      </a>
+    </li>
+
+    <li class="nav-item mb-1">
+      <a [routerLink]="['/examen']" routerLinkActive="active" class="nav-link text-dark d-flex align-items-center py-2 px-3">
+        <i class="bi bi-journal-check fs-5"></i>
+        <span class="ms-3 fw-medium" *ngIf="!isCollapsed">Examen</span>
+      </a>
+    </li>
+
+    <li class="nav-item mb-1">
+      <a [routerLink]="['/statistiques']" routerLinkActive="active" class="nav-link text-dark d-flex align-items-center py-2 px-3">
+        <i class="bi bi-bar-chart fs-5"></i>
+        <span class="ms-3 fw-medium">Statistiques</span>
+      </a>
+    </li>
+  </ul>
+
+ 
+</div>

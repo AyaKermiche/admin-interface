@@ -1,0 +1,218 @@
+<div class="container-fluid p-4 bg-light min-vh-100">
+  
+  <div class="mb-4">
+    <h3 class="fw-bold"> Bienvenue sur le système {{adminName }} </h3>
+    <p class="text-muted small text-uppercase fw-bold">Dashboard Quotidien</p>
+  </div>
+
+  <div class="mb-5">
+    <h6 class="fw-bold text-muted mb-3 small">ACTIONS RAPIDES</h6>
+    <div class="row g-3">
+      <div class="col-md-4">
+        <button class="btn btn-white border shadow-sm w-100 py-3 rounded-3" data-bs-toggle="modal" data-bs-target="#addCandidatModal">
+          <i class="bi bi-plus-circle me-2 text-primary"></i> NOUVEAU CANDIDAT
+        </button>
+      </div>
+      <div class="col-md-4">
+        <button class="btn btn-white border shadow-sm w-100 py-3 rounded-3" [routerLink]="['/planning']">
+          <i class="bi bi-calendar3 me-2 text-success"></i> NOUVELLE SÉANCE
+        </button>
+      </div>
+      <div class="col-md-4">
+        <button class="btn btn-white border shadow-sm w-100 py-3 rounded-3" data-bs-toggle="modal" data-bs-target="#addPaiementModal">
+          <i class="bi bi-cash-stack me-2 text-warning"></i> ENCAISSER PAIEMENT
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="loading" class="text-center py-5">
+    <div class="spinner-border text-primary" role="status"></div>
+    <p class="mt-2 text-muted">Chargement des données...</p>
+  </div>
+
+ <div *ngIf="!loading">
+  <!-- TABLEAU SÉANCES -->
+  <div class="card border-0 shadow-sm rounded-4 mb-4">
+    <div class="card-header bg-white border-0 py-3 d-flex justify-content-between align-items-center">
+      <h5 class="fw-bold mb-0 text-primary"><i class="bi bi-clock me-2"></i>SESSIONS D'AUJOURD'HUI</h5>
+      <span class="badge bg-primary rounded-pill">{{ sessionsToday.length }} rdv</span>
+    </div>
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0" style="table-layout: fixed;">
+        <thead class="bg-light">
+          <tr>
+            <th class="ps-4" style="width: 30%;">CANDIDAT</th>
+            <th style="width: 25%;">MONITEUR</th>
+            <th style="width: 20%;">HEURE</th>
+            <th style="width: 25%;">TYPE</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let s of sessionsToday">
+            <td class="ps-4">
+              <div class="fw-bold text-dark text-truncate">{{ s.candidate?.firstName }} {{ s.candidate?.lastName }}</div>
+            </td>
+            <td class="text-truncate">{{ s.instructor?.firstName }} {{ s.instructor?.lastName }}</td>
+            <td class="fw-bold">{{ s.startTime | date:'HH:mm' }}</td>
+            <td>
+              <span class="badge bg-opacity-10 px-3" 
+                    [ngClass]="s.typeSession === 'Conduite' ? 'bg-primary text-primary' : 'bg-info text-info'">
+                {{ s.typeSession }}
+              </span>
+            </td>
+          </tr>
+          <tr *ngIf="sessionsToday.length === 0">
+            <td colspan="4" class="text-center py-4 text-muted italic">Aucun rendez-vous aujourd'hui.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- TABLEAU EXAMENS -->
+  <div class="card border-0 shadow-sm rounded-4 mb-4">
+    <div class="card-header bg-white border-0 py-3 d-flex justify-content-between align-items-center">
+      <h5 class="fw-bold mb-0 text-primary">
+        <i class="bi bi-calendar-check me-2"></i>EXAMENS DE LA SEMAINE
+      </h5>
+      <span class="badge bg-primary rounded-pill">{{ examsWeek.length }} rdv</span>
+    </div>
+
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0" style="table-layout: fixed;">
+        <thead class="bg-light text-primary">
+          <tr>
+            <!-- On utilise les mêmes largeurs (30%, 25%, 20%, 25%) pour un alignement parfait -->
+            <th class="ps-4" style="width: 30%;">CANDIDAT</th>
+            <th style="width: 25%;">DATE & HEURE</th>
+            <th style="width: 20%;">TYPE</th>
+            <th style="width: 25%;">TÉLÉPHONE</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let ex of examsWeek">
+            <td class="ps-4 fw-bold text-truncate">
+              {{ ex.candidate?.firstName }} {{ ex.candidate?.lastName }}
+            </td>
+            <td class="fw-bold">
+              <span class="text-dark">{{ ex.examDate | date:'dd/MM' }}</span>
+              <small class="text-muted ms-2">{{ ex.examDate | date:'HH:mm' }}</small>
+            </td>
+            <td>
+              <span class="badge bg-primary bg-opacity-10 text-primary">
+                {{ ex.examType }}
+              </span>
+            </td>
+            <td class="text-muted text-truncate">
+              {{ ex.candidate?.phone || ex.candidate?.telephone || 'Non renseigné' }}
+            </td>
+          </tr>
+          <tr *ngIf="examsWeek.length === 0">
+            <td colspan="4" class="text-center py-4 text-muted fst-italic">
+              Pas d'examens cette semaine.
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="addCandidatModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content border-0 shadow">
+      <div class="modal-header border-bottom-0">
+        <h5 class="modal-title fw-bold text-uppercase"><i class="bi bi-plus-circle me-2"></i>Nouveau Candidat</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body p-4">
+        <form class="row g-3" (ngSubmit)="addCandidat()">
+          <div class="col-md-6"><label class="form-label small fw-bold">NOM</label>
+            <input type="text" class="form-control" [(ngModel)]="form.lastName" name="lastName" required></div>
+          <div class="col-md-6"><label class="form-label small fw-bold">PRÉNOM</label>
+            <input type="text" class="form-control" [(ngModel)]="form.firstName" name="firstName" required></div>
+          <div class="col-md-6"><label class="form-label small fw-bold">DATE DE NAISSANCE</label>
+            <input type="date" class="form-control" [(ngModel)]="form.birthDate" name="birthDate" required></div>
+          <div class="col-md-6"><label class="form-label small fw-bold">TÉLÉPHONE</label>
+            <input type="tel" class="form-control" [(ngModel)]="form.phone" name="phone" required></div>
+          <div class="col-md-6"><label class="form-label small fw-bold">TYPE DE PERMIS</label>
+            <select class="form-select" [(ngModel)]="form.licenseType" name="licenseType"> 
+
+              <option value="B">B</option><option value="A">A</option><option value="C">C</option>
+            </select></div> 
+              <div class="col-md-6">
+            <label class="form-label small fw-bold">Email</label>
+            <input type="email" class="form-control" 
+                   [(ngModel)]="form.email" 
+                   [ngModelOptions]="{standalone: true}">
+          </div> 
+           <div class="col-md-6">
+            <label class="form-label small fw-bold">Groupe Sanguin</label>
+            <select class="form-select" 
+                    [(ngModel)]="form.bloodType" 
+                    [ngModelOptions]="{standalone: true}" required>
+              <option value="A+">A+</option>
+              <option value="A-">A-</option>
+              <option value="B+">B+</option>
+              <option value="B-">B-</option>
+              <option value="AB+">AB+</option>
+              <option value="AB-">AB-</option>
+              <option value="O+">O+</option>
+              <option value="O-">O-</option>
+            </select>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label small fw-bold">Adresse</label>
+            <input type="text" class="form-control" 
+                   [(ngModel)]="form.address" 
+                   [ngModelOptions]="{standalone: true}">
+          </div>
+          <div class="col-md-6"><label class="form-label small fw-bold">MONITEUR AFFECTÉ</label>
+            <input class="form-control" list="instructorList" [(ngModel)]="instructorName" name="instructorName" placeholder="Rechercher...">
+            <datalist id="instructorList">
+              <option *ngFor="let ins of allInstructors" [value]="getDisplayName(ins)"></option>
+            </datalist></div>
+          <div class="col-md-6"><label class="form-label small fw-bold">PRIX TOTAL (DA)</label>
+            <input type="number" class="form-control" [(ngModel)]="form.totalPrice" name="totalPrice"></div>
+          <div class="col-12 text-end mt-4">
+            <button type="submit" class="btn btn-primary px-5 rounded-3 fw-bold" data-bs-dismiss="modal">ENREGISTRER</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="addPaiementModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow">
+      <div class="modal-header border-bottom-0">
+        <h5 class="modal-title fw-bold text-uppercase text-warning"><i class="bi bi-cash-stack me-2"></i>Paiement</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body p-4">
+        <form (ngSubmit)="savePaiement()">
+          <div class="mb-3 position-relative">
+            <label class="form-label small fw-bold">CANDIDAT</label>
+            <input type="text" class="form-control" [(ngModel)]="searchCandidateText" (input)="onSearchCandidate()" name="searchC" autocomplete="off" placeholder="Chercher un candidat..." required>
+            <ul class="list-group position-absolute w-100 shadow-sm z-3" *ngIf="showSuggestions" style="max-height: 200px; overflow-y: auto;">
+              <li class="list-group-item list-group-item-action cursor-pointer" *ngFor="let c of filteredCandidates" (click)="selectCandidate(c)">
+                {{ getDisplayName(c) }}
+              </li>
+            </ul>
+          </div>
+          <div class="mb-3">
+            <label class="form-label small fw-bold">MONTANT (DA)</label>
+            <input type="number" class="form-control form-control-lg fw-bold text-success" [(ngModel)]="newPayment.amount" name="amount" required>
+          </div>
+          <div class="mb-4">
+            <label class="form-label small fw-bold">DATE</label>
+            <input type="datetime-local" class="form-control" [(ngModel)]="newPayment.payment_time" name="paytime">
+          </div>
+          <button type="submit" class="btn btn-warning w-100 py-2 fw-bold text-white rounded-3 shadow-sm" [disabled]="!newPayment.candidateId" data-bs-dismiss="modal">VALIDER LE PAIEMENT</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>

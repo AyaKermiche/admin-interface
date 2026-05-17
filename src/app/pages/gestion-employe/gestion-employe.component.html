@@ -1,0 +1,240 @@
+<div class="container-fluid p-4">
+  @if (successMessage) {
+    <div class="alert alert-success text-center shadow-sm">{{ successMessage }}</div>
+  }
+  @if (errorMessage) {
+    <div class="alert alert-danger text-center shadow-sm">{{ errorMessage }}</div>
+  }
+
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="fw-bold text-dark m-0">
+      <i class="bi bi-people-fill me-2 text-primary"></i> Gestion des employés
+    </h2>
+    <button class="btn btn-dark shadow-sm" (click)="openAddModal()" data-bs-toggle="modal" data-bs-target="#addEmployeModal">
+      <i class="bi bi-plus-lg me-2"></i> AJOUTER EMPLOYÉ
+    </button>
+  </div>
+
+  <div class="card shadow-sm border-0 mb-4">
+    <div class="card-body">
+      <div class="input-group">
+        <span class="input-group-text bg-white border-end-0">
+          <i class="bi bi-search text-muted"></i>
+        </span>
+        <input type="text" class="form-control border-start-0" 
+               placeholder="Rechercher par nom ou prénom..." 
+               [(ngModel)]="searchTerm" 
+               (input)="onSearch()">
+      </div>
+    </div>
+  </div>
+
+  <div class="card shadow-sm border-0">
+    <div class="table-responsive">
+      <table class="table table-hover text-center align-middle mb-0">
+        <thead class="table-light">
+          <tr>
+            <th>NOM</th>
+            <th>PRÉNOM</th>
+            <th>TYPE / RÔLE</th> 
+            <th>NUMÉRO</th> 
+            <th>ACTION</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (emp of filteredEmployees; track emp.type + '-' + emp.id) {
+            <tr>
+              <td>{{ emp.lastName || emp.last_name | uppercase }}</td>
+              <td>{{ emp.firstName || emp.first_name }}</td>
+              <td>
+                @if (emp.type === 'admin') {
+                  <span class="badge rounded-pill px-3 bg-primary">
+                    {{ emp.role === 'proprietaire' ? 'PROPRIÉTAIRE' : 'SECRÉTAIRE' }}
+                  </span>
+                } @else {
+                  <span class="badge rounded-pill px-3 bg-info text-dark">
+                    MONITEUR
+                  </span>
+                }
+              </td>
+              <td class="text-muted">{{ emp.phone || '—' }}</td>
+              <td>
+                <button class="btn btn-sm btn-light border me-1" 
+        (click)="viewEmployee(emp)">
+  <i class="bi bi-eye text-dark"></i>
+</button>
+
+                @if (emp.type === 'instructor') {
+                  <a class="btn btn-sm btn-light border me-1 text-success" 
+                     [routerLink]="['/planning-moniteur', emp.id]">
+                    <i class="bi bi-calendar3"></i>
+                  </a>
+                }
+
+                <button class="btn btn-sm btn-light border me-1" 
+                        (click)="openEditModal(emp)"
+                        data-bs-toggle="modal" 
+                        data-bs-target="#addEmployeModal">
+                  <i class="bi bi-pencil text-primary"></i>
+                </button>
+
+                <button class="btn btn-sm btn-light border text-danger" 
+                        (click)="openDeleteModal(emp)" 
+                        data-bs-toggle="modal" 
+                        data-bs-target="#deleteEmployeModal">
+                  <i class="bi bi-trash"></i>
+                </button>
+              </td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="5" class="text-muted py-5">Aucun employé trouvé.</td>
+            </tr>
+          }
+        </tbody>  
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ADD / EDIT MODAL -->
+<div class="modal fade" id="addEmployeModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content border-0 shadow-lg">
+      <div class="modal-header">
+        <h5 class="fw-bold m-0 text-primary">
+          {{ isEditMode ? 'Modifier l\'employé' : 'Ajouter un nouvel employé' }}
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body p-4">
+        <form class="row g-3">
+          <div class="col-md-6">
+            <label class="form-label small fw-bold">Nom</label>
+            <input type="text" class="form-control" 
+                   [(ngModel)]="form.lastName" 
+                   [ngModelOptions]="{standalone: true}" required>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label small fw-bold">Prénom</label>
+            <input type="text" class="form-control" 
+                   [(ngModel)]="form.firstName" 
+                   [ngModelOptions]="{standalone: true}" required>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label small fw-bold">Téléphone</label>
+            <input type="tel" class="form-control" 
+                   [(ngModel)]="form.phone" 
+                   [ngModelOptions]="{standalone: true}">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label small fw-bold">Type</label>
+            <select class="form-select" 
+                    [(ngModel)]="form.type" 
+                    [ngModelOptions]="{standalone: true}">
+              <option value="admin">Admin</option>
+              <option value="instructor">Moniteur</option>
+            </select>
+          </div>
+
+          <!-- Affichage conditionnel du choix du rôle pour l'admin -->
+          @if (form.type === 'admin') {
+            <div class="col-md-6">
+              <label class="form-label small fw-bold text-primary">Rôle de l'admin</label>
+              <select class="form-select border-primary" 
+                      [(ngModel)]="form.role" 
+                      [ngModelOptions]="{standalone: true}">
+                <option value="secretaire">Secrétaire (par défaut)</option>
+                <option value="proprietaire">Propriétaire</option>
+              </select>
+            </div>
+          } @else {
+            <div class="col-md-6"></div>
+          }
+
+          <div class="col-12">
+            <label class="form-label small fw-bold">Email</label>
+            <input type="email" class="form-control" 
+                   [(ngModel)]="form.email" 
+                   [ngModelOptions]="{standalone: true}" required>
+          </div>
+
+          <div class="col-12 text-end mt-4">
+            <button type="button" class="btn btn-light border me-2" data-bs-dismiss="modal">Annuler</button>
+            <button type="button" class="btn btn-primary px-5 shadow" (click)="submitForm()">
+              {{ isEditMode ? 'Mettre à jour' : 'Ajouter' }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- DELETE MODAL -->
+<div class="modal fade" id="deleteEmployeModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-sm">
+    <div class="modal-content border-0 shadow-lg">
+      <div class="modal-body p-4 text-center">
+        <i class="bi bi-exclamation-triangle text-danger mb-3 d-block" style="font-size: 3rem;"></i>
+        <h5 class="fw-bold">Supprimer l'employé ?</h5>
+        <p class="text-muted small">Cette action est définitive.</p>
+        <div class="d-flex justify-content-center gap-2 mt-4">
+          <button type="button" class="btn btn-light border px-3 w-100" data-bs-dismiss="modal">Non</button>
+          <button type="button" class="btn btn-danger px-3 w-100" 
+                  (click)="deleteEmployee()" 
+                  data-bs-dismiss="modal">
+            Confirmer
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- VIEW MODAL -->
+<div class="modal fade" id="viewEmployeModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="false">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow-lg">
+      <div class="modal-header border-0 pb-0">
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body p-4 pt-0 text-center">
+        <h3 class="fw-bold mb-1">Détails de l'Employé</h3>
+        <p class="text-muted small mb-4">Informations enregistrées</p>
+
+        <div class="list-group list-group-flush border-top border-bottom text-start">
+          <div class="list-group-item d-flex justify-content-between py-3">
+            <span class="text-muted"><i class="bi bi-person me-2"></i> Nom :</span>
+            <span class="fw-bold">{{ selectedEmployee?.lastName || selectedEmployee?.last_name }}</span>
+          </div>
+          <div class="list-group-item d-flex justify-content-between py-3">
+            <span class="text-muted"><i class="bi bi-person-badge me-2"></i> Prénom :</span>
+            <span class="fw-bold">{{ selectedEmployee?.firstName || selectedEmployee?.first_name }}</span>
+          </div>
+          <div class="list-group-item d-flex justify-content-between py-3">
+            <span class="text-muted"><i class="bi bi-telephone me-2"></i> Téléphone :</span>
+            <span class="fw-bold">{{ selectedEmployee?.phone || '—' }}</span>
+          </div>
+          <div class="list-group-item d-flex justify-content-between py-3">
+            <span class="text-muted"><i class="bi bi-envelope me-2"></i> Email :</span>
+            <span class="fw-bold">{{ selectedEmployee?.email || '—' }}</span>
+          </div>
+          <div class="list-group-item d-flex justify-content-between py-3">
+            <span class="text-muted"><i class="bi bi-briefcase me-2"></i> Type :</span>
+            @if (selectedEmployee?.type === 'admin') {
+              <span class="badge rounded-pill px-3 bg-primary">
+                {{ selectedEmployee?.role === 'proprietaire' ? 'PROPRIÉTAIRE' : 'SECRÉTAIRE' }}
+              </span>
+            } @else {
+              <span class="badge rounded-pill px-3 bg-info text-dark">MONITEUR</span>
+            }
+          </div>
+        </div>
+
+        <button type="button" class="btn btn-light border mt-4 px-5 shadow-sm" data-bs-dismiss="modal">
+          Fermer
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

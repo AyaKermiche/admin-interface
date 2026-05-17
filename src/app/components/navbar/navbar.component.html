@@ -1,0 +1,231 @@
+<nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom px-4 py-2">
+  <div class="container-fluid">
+    <div class="d-flex align-items-center">
+      <i class="bi bi-compass fs-4 me-2 text-primary"></i>
+      <span class="fw-bold fs-5 text-dark">Drive Your Self</span>
+    </div>
+
+    <div class="ms-auto d-flex align-items-center">
+      <div class="dropdown">
+        <a href="javascript:void(0)" class="text-dark" id="userDropdown" data-bs-toggle="dropdown">
+          <i class="bi bi-person-circle fs-3"></i>
+        </a>
+        <ul class="dropdown-menu dropdown-menu-end shadow border-0">
+          <li>
+            <a class="dropdown-item py-2" href="javascript:void(0)" (click)="openProfileModal()">
+              <i class="bi bi-person me-2"></i> Mon Profil
+            </a>
+          </li>
+          <li><hr class="dropdown-divider"></li>
+          <li>
+            <a class="dropdown-item py-2 text-danger" href="javascript:void(0)" (click)="logout()">
+              <i class="bi bi-box-arrow-right me-2"></i> Déconnexion
+            </a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<div class="modal fade" id="profileModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow-lg">
+      <div class="modal-header border-0 pb-0">
+        <h5 class="modal-title fw-bold">Détails du compte</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body py-4 px-4">
+        <div class="row g-4 mb-4">
+          <div class="col-6">
+            <label class="text-muted small fw-bold text-uppercase d-block mb-1">Prénom</label>
+            <p class="mb-0 fw-medium text-dark border-bottom pb-2">{{ admin.firstName }}</p>
+          </div> 
+          <div class="col-6">
+            <label class="text-muted small fw-bold text-uppercase d-block mb-1">Nom</label>
+            <p class="mb-0 fw-medium text-dark border-bottom pb-2">{{ admin.lastName  }}</p>
+          </div>
+          <div class="col-12">
+            <label class="text-muted small fw-bold text-uppercase d-block mb-1">Email</label>
+            <p class="mb-0 fw-medium text-dark border-bottom pb-2">{{ admin.email }}</p>
+          </div>
+          <div class="col-12">
+            <label class="text-muted small fw-bold text-uppercase d-block mb-1">Téléphone</label>
+            <p class="mb-0 fw-medium text-dark border-bottom pb-2">{{ admin.phone || 'Non renseigné' }}</p>
+          </div>
+        </div>
+
+        <button type="button" class="btn btn-outline-success w-100 fw-bold py-2 mb-3 shadow-sm" (click)="openSchoolModal()">
+          Informations Auto-école
+        </button>
+
+        <button type="button" class="btn btn-primary w-100 fw-bold py-2 shadow-sm" (click)="openEditProfileModal()">
+          Modifier mes informations
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ====================== SCHOOL MODAL (Affichage) ====================== -->
+<div class="modal fade" id="schoolModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow-lg">
+      <div class="modal-header border-0 pb-0">
+        <h5 class="modal-title fw-bold text-success">Mon Auto-école</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body py-4 px-4">
+        <div class="row g-3">
+          <div class="col-12">
+            <label class="form-label small fw-bold">Nom de l'établissement</label>
+            <p class="mb-0 fw-medium text-dark border-bottom pb-2">{{ school.name || 'Chargement...' }}</p>
+          </div>
+          <div class="col-12">
+            <label class="form-label small fw-bold text-primary">Adresse</label>
+            <p class="mb-0 fw-medium text-dark border-bottom pb-2">{{ school.address || 'Non renseignée' }}</p>
+          </div>
+          <div class="col-12">
+            <label class="form-label small fw-bold">Téléphone</label>
+            <p class="mb-0 fw-medium text-dark border-bottom pb-2">{{ school.phone || 'Non renseigné' }}</p>
+          </div>
+        </div>
+
+        <!-- DESCRIPTION ACTUELLE -->
+        <div class="row mt-4">
+          <div class="col-12">
+            <label class="form-label small fw-bold text-primary">DESCRIPTION ACTUELLE</label>
+            <div class="p-3 bg-light rounded border" style="min-height: 110px; white-space: pre-wrap; line-height: 1.5;">
+              {{ school.description || 'Aucune description enregistrée.' }}
+            </div>
+          </div>
+        </div>
+
+        <div class="d-flex justify-content-end gap-2 mt-4">
+          <button type="button" class="btn btn-light fw-bold" (click)="openProfileModal()">Retour</button>
+          <button type="button" class="btn btn-success px-4 fw-bold" (click)="openEditSchoolModal()">Changer les informations</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ====================== EDIT SCHOOL MODAL ====================== -->
+
+
+
+<div class="modal fade" id="editSchoolModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow-lg">
+      <div class="modal-header border-0 pb-0">
+        <h5 class="modal-title fw-bold">Modifier l'auto-école</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body py-4 px-4">
+        <form (submit)="$event.preventDefault()">
+          <div class="row g-3">
+            <div class="col-12">
+              <label class="form-label small fw-bold">Nom de l'auto-école</label>
+              <input type="text" class="form-control" name="schoolName" [(ngModel)]="school.name">
+            </div>
+            <div class="col-12">
+              <label class="form-label small fw-bold">Adresse</label>
+              <input type="text" class="form-control" name="schoolAddress" [(ngModel)]="school.address">
+            </div>
+            <div class="col-6">
+              <label class="form-label small fw-bold">Téléphone</label>
+              <input type="text" class="form-control" name="schoolPhone" [(ngModel)]="school.phone">
+            </div>
+            <div class="col-6">
+              <label class="form-label small fw-bold">Email</label>
+              <input type="email" class="form-control" name="schoolEmail" [(ngModel)]="school.email">
+            </div>
+            <div class="col-12">
+              <label class="form-label small fw-bold">Description</label>
+              <textarea class="form-control" name="schoolDescription" rows="4" [(ngModel)]="school.description"></textarea>
+            </div>
+          </div>
+
+          <div class="d-flex justify-content-end gap-2 mt-4">
+            <button type="button" class="btn btn-light fw-bold" (click)="openSchoolModal()">Retour</button>
+            <button type="button" class="btn btn-primary px-4 fw-bold" (click)="updateSchool()">Enregistrer</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="editProfileModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow-lg">
+      <div class="modal-header border-0 pb-0">
+        <h5 class="modal-title fw-bold">Modifier le profil</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body py-4 px-4">
+        <form (submit)="$event.preventDefault()">
+          <div class="row g-3">
+            <div class="col-6">
+              <label class="form-label small fw-bold">Prénom</label>
+              <input type="text" class="form-control" name="fname" [(ngModel)]="admin.firstName">
+            </div>
+            <div class="col-6">
+              <label class="form-label small fw-bold">Nom</label>
+              <input type="text" class="form-control" name="lname" [(ngModel)]="admin.lastName">
+            </div>
+            <div class="col-12">
+              <label class="form-label small fw-bold">Email</label>
+              <input type="email" class="form-control" name="email" [(ngModel)]="admin.email">
+            </div>
+            <div class="col-12">
+              <label class="form-label small fw-bold">Téléphone</label>
+              <input type="text" class="form-control" name="phone" [(ngModel)]="admin.phone">
+            </div>
+          </div>
+
+          <div class="d-flex justify-content-between mt-4">
+            <button type="button" class="btn btn-outline-secondary btn-sm" (click)="openPasswordModal()">
+              Changer le mot de passe
+            </button>
+            <div class="d-flex gap-2">
+              <button type="button" class="btn btn-light fw-bold" (click)="openProfileModal()">Retour</button>
+              <button type="button" class="btn btn-primary px-4 fw-bold" (click)="updateAdmin()">Enregistrer</button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="passwordModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow-lg">
+      <div class="modal-header border-0 pb-0">
+        <h5 class="modal-title fw-bold">Changer le mot de passe</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body py-4 px-4">
+        <div class="mb-3">
+          <label class="form-label small fw-bold">Mot de passe actuel</label>
+          <input type="password" class="form-control" name="currPass" [(ngModel)]="currentPassword">
+        </div>
+        <div class="mb-3">
+          <label class="form-label small fw-bold">Nouveau mot de passe</label>
+          <input type="password" class="form-control" name="newPass" [(ngModel)]="newPassword">
+        </div>
+        <div class="mb-3">
+          <label class="form-label small fw-bold">Confirmer le nouveau mot de passe</label>
+          <input type="password" class="form-control" name="confPass" [(ngModel)]="confirmPassword">
+        </div>
+
+        <div class="d-flex justify-content-end gap-2 mt-4">
+          <button type="button" class="btn btn-light fw-bold" (click)="openEditProfileModal()">Retour</button>
+          <button type="button" class="btn btn-primary px-4 fw-bold" (click)="updatePassword()">Mettre à jour</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

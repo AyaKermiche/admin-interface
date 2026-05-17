@@ -1,0 +1,93 @@
+/* Conteneur principal du calendrier */
+.calendar-grid {
+  display: flex;
+  position: relative;
+  height: 720px;
+  overflow-y: auto;
+  overflow-x: auto; // Permet de scroller si les 7 jours sont trop larges
+  background-color: #fff;
+}
+
+/* Colonne des heures (fixe à gauche) */
+.time-col {
+  width: 60px;
+  min-width: 60px;
+  background-color: #f8f9fa;
+  border-right: 1px solid #dee2e6;
+  position: sticky;
+  left: 0;
+  z-index: 20;
+}
+
+/* Colonne d'un jour */
+.day-col {
+  flex: 1;
+  min-width: 150px; // Important pour garder la lisibilité sur 7 jours
+  position: relative;
+  border-right: 1px solid #f0f0f0;
+  
+  // Les lignes horizontales de fond
+  background-image: linear-gradient(#f0f0f0 1px, transparent 1px);
+  background-size: 100% 60px;
+}
+
+/* Style des cartes de session (exactement comme ton screenshot) */
+.session-event {
+  position: absolute;
+  left: 8px;
+  right: 8px;
+  padding: 10px;
+  border-radius: 10px;
+  color: white;
+  font-size: 0.8rem;
+  font-weight: 500;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transition: all 0.25s ease;
+  overflow: hidden;
+  cursor: pointer;
+  z-index: 5;
+
+  &:hover {
+    z-index: 100 !important;
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2) !important;
+    height: auto !important; // L'extension dont tu parlais
+    min-height: 100px;
+  }
+
+  .session-time {
+    font-size: 0.7rem;
+    font-weight: bold;
+    margin-bottom: 4px;
+    display: block;
+  }
+
+  .session-title {
+    font-size: 0.9rem;
+    font-weight: 700;
+    margin-bottom: 5px;
+    display: block;
+  }
+
+  .session-detail {
+    font-size: 0.75rem;
+    display: flex;
+    align-items: center;
+    opacity: 0.9;
+    i { margin-right: 5px; }
+  }
+}
+
+/* Gradients du screenshot */
+.bg-conduite { background: linear-gradient(180deg, #3f6ad8 0%, #2955c8 100%) !important; }
+.bg-code { background: linear-gradient(180deg, #3ac47d 0%, #16a05d 100%) !important; }
+.bg-creneau { background: linear-gradient(180deg, #f7b924 0%, #d39e00 100%) !important; }
+
+/* Couleurs sombres pour les créneaux (avec opacité) */
+.bg-dark-blue { background-color: rgba(0, 61, 130, 0.25) !important; }
+.bg-dark-amber { background-color: rgba(133, 100, 4, 0.25) !important; }
+.bg-dark-green { background-color: rgba(21, 87, 36, 0.25) !important; }
+
+/* Couleur orange pour les sessions réservées */
+.bg-session-reserved { background-color: #ff7f27 !important; }
+

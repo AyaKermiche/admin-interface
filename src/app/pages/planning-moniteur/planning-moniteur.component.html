@@ -1,0 +1,219 @@
+<div class="container-fluid p-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h2 class="fw-bold text-dark m-0">
+        <i class="bi bi-calendar-check me-2 text-primary"></i> Gestion des employés
+      </h2>
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb mb-0">
+          <li class="breadcrumb-item"><a routerLink="/employes" class="text-decoration-none">Employés</a></li>
+          <li class="breadcrumb-item active">Configuration Planning</li>
+        </ol>
+      </nav>
+    </div>
+    
+    <button class="btn btn-dark px-4 shadow-sm" 
+            data-bs-toggle="modal" 
+            data-bs-target="#addDayModal"
+            [disabled]="availableDaysToAdd.length === 0">
+      <i class="bi bi-calendar-plus me-2"></i> Ajouter une journée
+    </button>
+  </div>
+
+    <button class="btn btn-outline-info" (click)="copyPreviousWeek()">
+  Récupérer le planning 
+</button>
+  <div class="card shadow-sm border-0 rounded-4 p-4">
+    <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-2">
+      <h5 class="fw-bold m-0">horaire hebdomadaire :</h5>
+      <span class="text-muted small text-uppercase">
+        Moniteur: <strong>{{ instructorName }}</strong>
+      </span>
+    </div>
+ 
+
+    <div *ngFor="let day of daysInPlanning" class="row align-items-center mb-4 g-3">
+      <div class="col-auto">
+        <div class="rounded-circle bg-dark text-white d-flex align-items-center justify-content-center fw-bold shadow" 
+             style="width: 50px; height: 50px;" 
+             [title]="day.fullName">
+          {{ day.label }}
+        </div>
+      </div>
+
+      <div class="col d-flex flex-wrap gap-2 align-items-center">
+        <div *ngFor="let slot of getSlotsForDay(day.index)" 
+             class="bg-white border rounded-3 p-2 d-flex align-items-center shadow-sm">
+          <span class="me-3 fw-bold text-primary">{{ slot.startTime }} - {{ slot.endTime }}</span>
+          
+          <span class="badge bg-light text-dark border me-3 text-capitalize">{{ slot.typeWork }}</span>
+          
+          <div class="btn-group">
+            <button class="btn btn-sm btn-link text-info p-0 me-2" 
+                    title="Modifier"
+                    (click)="openEditSlotModal(slot)"
+                    data-bs-toggle="modal" 
+                    data-bs-target="#editTimeSlotModal">
+              <i class="bi bi-pencil"></i>
+            </button>
+            <button class="btn btn-sm btn-link text-danger p-0" (click)="removeSlot(slot)">
+              <i class="bi bi-trash"></i>
+            </button>
+          </div>
+        </div>
+
+        <button class="btn btn-outline-secondary btn-sm rounded-circle" 
+                title="Ajouter heure" 
+                (click)="openTimeSlotModal(day.index)"
+                data-bs-toggle="modal" 
+                data-bs-target="#addTimeSlotModal">
+          <i class="bi bi-plus-lg"></i>
+        </button>
+      </div>
+    </div>
+
+    <div *ngIf="daysInPlanning.length === 0" class="text-center py-5 text-muted">
+      <i class="bi bi-calendar-x display-4"></i>
+      <p class="mt-2">Aucun horaire configuré. Cliquez sur "Ajouter une journée" pour commencer.</p>
+    </div>
+
+    <div class="mt-5 border-top pt-4 d-flex justify-content-between">
+      <button class="btn btn-outline-danger px-4" 
+              data-bs-toggle="modal" 
+              data-bs-target="#cancelConfirmModal">
+        Annuler les changements
+      </button>
+      <button class="btn btn-primary px-5 shadow fw-bold" (click)="saveAllChanges()">
+        ENREGISTRER TOUT LE PLANNING
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="addDayModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow-lg">
+      <div class="modal-header bg-dark text-white p-4">
+        <h5 class="modal-title fw-bold"><i class="bi bi-calendar-plus me-2"></i> Ajouter une Journée</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body p-4">
+        <div class="mb-4">
+          <label class="form-label fw-bold text-dark">Sélectionner le jour :</label>
+          <select class="form-select form-select-lg border-2" [(ngModel)]="selectedDayToAdd" name="dayToAdd">
+            <option *ngFor="let d of availableDaysToAdd" [value]="d.index">{{ d.fullName }}</option>
+          </select>
+        </div>
+        <button type="button" 
+                class="btn btn-dark w-100 py-3 fw-bold mt-2 shadow" 
+                (click)="confirmAddDay()" 
+                data-bs-dismiss="modal">
+          AJOUTER LA JOURNÉE
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ====================== CANCEL CONFIRMATION MODAL ====================== -->
+<div class="modal fade" id="cancelConfirmModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-sm">
+    <div class="modal-content border-0 shadow">
+      <div class="modal-body p-4 text-center">
+        <i class="bi bi-exclamation-triangle text-warning mb-3 d-block" style="font-size: 3rem;"></i>
+        <h5 class="fw-bold">Annuler les modifications ?</h5>
+        <p class="text-muted small">Les changements non enregistrés seront perdus.</p>
+        <div class="d-flex justify-content-center gap-2 mt-4">
+          <button type="button" class="btn btn-outline-secondary px-4" data-bs-dismiss="modal">
+            Continuer
+          </button>
+          <button type="button" class="btn btn-danger px-4" (click)="confirmCancel()" data-bs-dismiss="modal">
+            Annuler
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ====================== FEEDBACK MODAL ====================== -->
+<div class="modal fade" id="feedbackModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-sm">
+    <div class="modal-content border-0 shadow-lg rounded-4">
+      <div class="modal-body text-center p-4">
+        <div [ngClass]="feedbackType === 'success' ? 'text-success' : 'text-danger'">
+          <i class="bi" [ngClass]="feedbackType === 'success' ? 'bi-check-circle-fill' : 'bi-x-circle-fill'" style="font-size: 3rem;"></i>
+        </div>
+        <h5 class="fw-bold mt-3">{{ feedbackTitle }}</h5>
+        <p class="text-muted mb-4">{{ feedbackMessage }}</p>
+        <button type="button" class="btn" [ngClass]="feedbackType === 'success' ? 'btn-success' : 'btn-danger'" data-bs-dismiss="modal">
+          Fermer
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="editTimeSlotModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-sm modal-dialog-centered">
+    <div class="modal-content border-0 shadow">
+      <div class="modal-header border-0 pb-0">
+        <h6 class="modal-title fw-bold">Modifier l'horaire</h6>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body p-4">
+        <div class="mb-3">
+          <label class="form-label small fw-bold text-muted">DE</label>
+          <input type="time" class="form-control bg-light" [(ngModel)]="tempSlot.startTime" name="editStartTime">
+        </div>
+        <div class="mb-3">
+          <label class="form-label small fw-bold text-muted">A</label>
+          <input type="time" class="form-control bg-light" [(ngModel)]="tempSlot.endTime" name="editEndTime">
+        </div>
+        <div class="mb-3">
+          <label class="form-label small fw-bold text-muted">TYPE</label>
+          <select class="form-select bg-light" [(ngModel)]="tempSlot.typeWork" name="editTypeWork">
+            <option value="conduite">Conduite</option>
+            <option value="code">Code</option>
+            <option value="creneau">Creneau</option>
+          </select>
+        </div>
+        <button class="btn btn-primary w-100" (click)="confirmEditSlot()" data-bs-dismiss="modal">
+          Enregistrer
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="addTimeSlotModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-sm modal-dialog-centered">
+    <div class="modal-content border-0 shadow">
+      <div class="modal-header border-0 pb-0">
+        <h6 class="modal-title fw-bold">Nouvel Horaire ({{ getDayName(selectedDayIndex) }})</h6>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body p-4">
+        <div class="mb-3">
+          <label class="form-label small fw-bold text-muted">DE</label>
+          <input type="time" class="form-control bg-light" [(ngModel)]="tempSlot.startTime" name="startTime">
+        </div>
+        <div class="mb-3">
+          <label class="form-label small fw-bold text-muted">À</label>
+          <input type="time" class="form-control bg-light" [(ngModel)]="tempSlot.endTime" name="endTime">
+        </div>
+        <div class="mb-3">
+          <label class="form-label small fw-bold text-muted">TYPE</label>
+          <select class="form-select bg-light" [(ngModel)]="tempSlot.typeWork" name="typeWork">
+            <option value="conduite">Conduite</option>
+            <option value="code">Code</option>
+            <option value="creneau">Créneau</option>
+          </select>
+        </div>
+        <button class="btn btn-primary w-100" (click)="confirmAddTimeSlot()" data-bs-dismiss="modal">
+          Ajouter
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

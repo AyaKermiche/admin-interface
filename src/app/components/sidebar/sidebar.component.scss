@@ -1,0 +1,42 @@
+.sidebar-container {
+  width: 250px;
+  transition: width 0.3s ease-in-out;
+  overflow-x: hidden;
+  white-space: nowrap;
+
+  // When collapsed, shrink to icon-only width
+  &.collapsed {
+    width: 75px;
+
+    .nav-link {
+      justify-content: center;
+      padding-left: 0 !important;
+      padding-right: 0 !important;
+    }
+
+    .ms-3 {
+      display: none; // Safety fallback for labels
+    }
+  }
+}
+
+.nav-link {
+  border-radius: 8px;
+  margin: 0 4px;
+  transition: background 0.2s;
+
+  &:hover:not(.active) {
+    background-color: #f0f0f0;
+  }
+
+  &.active {
+    background-color: #0d6efd !important; // Primary Blue
+    color: white !important;
+    box-shadow: 0 4px 6px rgba(13, 110, 253, 0.2);
+  }
+}
+
+.bi {
+  min-width: 24px;
+  text-align: center;
+}

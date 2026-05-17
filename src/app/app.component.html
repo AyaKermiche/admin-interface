@@ -1,0 +1,14 @@
+<div class="d-flex min-vh-100 bg-white">
+  
+  <app-sidebar *ngIf="showNavbar"></app-sidebar>
+
+  <div class="flex-grow-1 d-flex flex-column bg-light overflow-hidden">
+    
+    <app-navbar *ngIf="showNavbar"></app-navbar>
+
+    <main class="p-4 overflow-auto">
+      <router-outlet></router-outlet>
+    </main>
+    
+  </div>
+</div>

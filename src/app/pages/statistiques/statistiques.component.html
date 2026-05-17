@@ -1,0 +1,110 @@
+<div class="container-fluid p-4 bg-light min-vh-100">
+
+  @if (loading) {
+    <div class="text-center py-5">
+      <div class="spinner-border text-primary"></div>
+      <p class="mt-3 text-muted">Chargement du tableau de bord...</p>
+    </div>
+  } @else {
+
+    <div class="mb-4 d-flex justify-content-between align-items-center">
+      <div>
+        <h2 class="fw-bold text-uppercase">Tableau de Bord</h2>
+        <p class="text-muted">Bienvenue, <span class="text-primary fw-bold">{{adminName }}</span></p>
+      </div>
+    </div>
+
+    <div class="row g-3 mb-4">
+
+      <div class="col-md-3">
+        <div class="card border-0 border-top border-4 border-primary shadow-sm rounded-4 p-3">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <i class="bi bi-people text-primary fs-3"></i>
+          </div>
+          <h2>{{ stats.candidates }}</h2>
+          <small class="text-muted text-uppercase fw-semibold">Candidats</small>
+        </div>
+      </div>
+
+      <div class="col-md-3">
+        <div class="card border-0 border-top border-4 border-info shadow-sm rounded-4 p-3">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <i class="bi bi-person-badge text-info fs-3"></i>
+          </div>
+          <h2>{{ stats.instructors }}</h2>
+          <small class="text-muted text-uppercase fw-semibold">Moniteurs</small>
+        </div>
+      </div>
+
+      <div class="col-md-3">
+        <div class="card border-0 border-top border-4 border-warning shadow-sm rounded-4 p-3">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <i class="bi bi-book text-warning fs-3"></i>
+            <span class="badge bg-warning bg-opacity-10 text-warning">Aujourd'hui</span>
+          </div>
+          <h2>{{ stats.sessionsToday }}</h2>
+          <small class="text-muted text-uppercase fw-semibold">Sessions</small>
+        </div>
+      </div>
+
+      <div class="col-md-3">
+        <div class="card border-0 border-top border-4 border-success shadow-sm rounded-4 p-3">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <i class="bi bi-cash-stack text-success fs-3"></i>
+          </div>
+          <h2>{{ stats.totalRevenue | number:'1.0-0' }} DA</h2>
+          <small class="text-muted text-uppercase fw-semibold">Revenus Totaux</small>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="row g-4">
+
+      <div class="col-12 col-lg-8">
+        <div class="card p-4 shadow-sm rounded-4 border-0">
+          <div class="d-flex justify-content-between align-items-center mb-4">
+            <h5 class="fw-bold mb-0">
+              {{ chartMode === 'weekly' ? 'Sessions (7 derniers jours)' : 'Revenus (Par mois)' }}
+            </h5>
+            
+            <select class="form-select w-auto shadow-sm" (change)="setChartMode($any($event.target).value)">
+              <option value="weekly">Vue Hebdomadaire</option>
+              <option value="monthly">Vue Mensuelle</option>
+            </select>
+          </div>
+
+          <div style="height: 320px; position: relative;">
+            <canvas id="mainChart"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-12 col-lg-4">
+        <div class="card p-4 shadow-sm rounded-4 border-0 text-center h-100 d-flex flex-column justify-content-center">
+          <h6 class="text-muted text-uppercase fw-bold mb-4">Performance aux Examens</h6>
+
+          <div class="position-relative d-inline-flex justify-content-center align-items-center mx-auto"
+               style="width: 160px; height: 160px;">
+            
+            <svg class="w-100 h-100" viewBox="0 0 36 36">
+              <path class="text-light" stroke-dasharray="100, 100" stroke-width="3" stroke="currentColor" fill="none"
+                d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+              <path class="text-success" [attr.stroke-dasharray]="stats.successRate + ', 100'" stroke-width="3" stroke="currentColor" fill="none"
+                d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+            </svg>
+
+            <div class="position-absolute text-center">
+              <h2 class="text-success fw-bold mb-0">{{ stats.successRate }}%</h2>
+              <small class="text-muted">Réussite</small>
+            </div>
+          </div>
+          
+          <p class="mt-4 text-muted small">Basé sur l'ensemble des examens passés et validés.</p>
+        </div>
+      </div>
+
+    </div>
+
+  }
+</div>
