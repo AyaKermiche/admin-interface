@@ -42,3 +42,5 @@ testem.log
 Thumbs.db
 .history/
 %APPDATA%/
+node_modules/
+.angular/
