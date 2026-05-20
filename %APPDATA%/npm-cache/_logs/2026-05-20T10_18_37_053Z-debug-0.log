@@ -1,0 +1,33 @@
+0 verbose cli C:\Program Files\nodejs\node.exe C:\Program Files\nodejs\node_modules\npm\bin\npm-cli.js
+1 info using npm@10.9.0
+2 info using node@v22.11.0
+3 silly config load:file:C:\Program Files\nodejs\node_modules\npm\npmrc
+4 silly config load:file:C:\Users\HP\.npmrc
+5 silly config load:file:C:\Users\HP\Downloads\frontend-main\frontend-main\%APPDATA%\npm\etc\npmrc
+6 verbose title npm exec ng serve
+7 verbose argv "exec" "--" "ng" "serve"
+8 verbose logfile logs-max:10 dir:C:\Users\HP\Downloads\frontend-main\frontend-main\%APPDATA%\npm-cache\_logs\2026-05-20T10_18_37_053Z-
+9 verbose logfile C:\Users\HP\Downloads\frontend-main\frontend-main\%APPDATA%\npm-cache\_logs\2026-05-20T10_18_37_053Z-debug-0.log
+10 silly logfile done cleaning log files
+11 silly packumentCache heap:4345298944 maxSize:1086324736 maxEntrySize:543162368
+12 http fetch GET 200 https://registry.npmjs.org/npm 353ms
+13 http fetch GET 200 https://registry.npmjs.org/ng 531ms (cache miss)
+14 verbose stack Error: could not determine executable to run
+14 verbose stack     at getBinFromManifest (C:\Program Files\nodejs\node_modules\npm\node_modules\libnpmexec\lib\get-bin-from-manifest.js:17:23)
+14 verbose stack     at exec (C:\Program Files\nodejs\node_modules\npm\node_modules\libnpmexec\lib\index.js:202:15)
+14 verbose stack     at async Npm.exec (C:\Program Files\nodejs\node_modules\npm\lib\npm.js:207:9)
+14 verbose stack     at async module.exports (C:\Program Files\nodejs\node_modules\npm\lib\cli\entry.js:74:5)
+15 verbose pkgid ng@0.0.0
+16 error could not determine executable to run
+17 verbose cwd C:\Users\HP\Downloads\frontend-main\frontend-main
+18 verbose os Windows_NT 10.0.26200
+19 verbose node v22.11.0
+20 verbose npm  v10.9.0
+21 notice
+21 notice New [31mmajor[39m version of npm available! [31m10.9.0[39m -> [34m11.14.1[39m
+21 notice Changelog: [34mhttps://github.com/npm/cli/releases/tag/v11.14.1[39m
+21 notice To update run: [4mnpm install -g npm@11.14.1[24m
+21 notice  { force: true, [Symbol(proc-log.meta)]: true }
+22 verbose exit 1
+23 verbose code 1
+24 error A complete log of this run can be found in: C:\Users\HP\Downloads\frontend-main\frontend-main\%APPDATA%\npm-cache\_logs\2026-05-20T10_18_37_053Z-debug-0.log

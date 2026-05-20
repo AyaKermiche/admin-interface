@@ -42,8 +42,7 @@ export class GestionEmployeComponent implements OnInit {
       lastName: '',
       phone: '',
       email: '',
-      type: 'instructor',
-      role: 'secretaire' // Rôle par défaut si 'admin' est sélectionné
+      type: 'instructor'
     };
   }
 
@@ -56,7 +55,6 @@ export class GestionEmployeComponent implements OnInit {
         const adminList = (res.admins?.records || res.admins || []).map((a: any) => ({
           ...a,
           type: 'admin',
-          role: a.role || 'secretaire', // S'assure d'avoir le rôle remonté par le backend
           firstName: a.firstName || a.first_name || '',
           lastName: a.lastName || a.last_name || ''
         }));
@@ -88,75 +86,18 @@ export class GestionEmployeComponent implements OnInit {
   }
 
   submitForm() {
-  if (!this.form.firstName || !this.form.lastName || !this.form.email) {
-    this.showError('Veuillez remplir les champs obligatoires.');
-    return;
-  }
-
-  if (this.isEditMode && this.selectedEmployee) {
-    const type = this.selectedEmployee.type;
-
-    const payload: any = {
-      firstName: this.form.firstName,
-      lastName: this.form.lastName,
-      phone: this.form.phone,
-      email: this.form.email,
-      drivingSchoolId: 1
-    };
-
-    if (type === 'admin') {
-      payload.role = this.form.role;
-    }
-
-    const service = type === 'admin' ? this.adminService : this.instructorService;
-    service.update(this.selectedEmployee.id, payload).subscribe({
-      next: () => this.handleSuccess('Modifié avec succès !'),
-      error: () => this.showError('Erreur lors de la modification.')
-    });
-
-  } else {
-    const type = this.form.type;
-
-    const payload: any = {
-      firstName: this.form.firstName,
-      lastName: this.form.lastName,
-      phone: this.form.phone,
-      email: this.form.email,
-      drivingSchoolId: 1
-    };
-
-    if (type === 'admin') {
-      payload.role = this.form.role;
-    }
-
-    const service = type === 'admin' ? this.adminService : this.instructorService;
-    service.create(payload).subscribe({
-      next: () => this.handleSuccess('Ajouté avec succès !'),
-      error: (err) => {
-        console.error(err);
-        this.showError('Erreur lors de l\'ajout.');
-      }
-    });
-  }
-}
-  /*submitForm() {
     if (!this.form.firstName || !this.form.lastName || !this.form.email) {
       this.showError('Veuillez remplir les champs obligatoires.');
       return;
     }
 
-    const payload: any = {
+    const payload = {
       firstName: this.form.firstName,
       lastName: this.form.lastName,
       phone: this.form.phone,
       email: this.form.email,
       drivingSchoolId: 1
     };
-
-    // Si c'est un administrateur, on ajoute le rôle choisi au payload
-    if (this.form.type === 'admin') {
-      payload.role = this.form.role;
-    }
 
     if (this.isEditMode && this.selectedEmployee) {
       // UPDATE
@@ -168,8 +109,11 @@ export class GestionEmployeComponent implements OnInit {
     } else {
       // CREATE
       const service = this.form.type === 'admin' ? this.adminService : this.instructorService;
+      
+      
+  
 
-      service.create(payload).subscribe({
+      service.create(payload as any).subscribe({     // ← Ici on utilise .create() qui existe dans tes services
         next: () => this.handleSuccess('Ajouté avec succès !'),
         error: (err) => {
           console.error(err);
@@ -177,7 +121,7 @@ export class GestionEmployeComponent implements OnInit {
         }
       });
     }
-  }*/
+  }
 
   deleteEmployee() {
     if (!this.selectedEmployee) return;
@@ -209,8 +153,7 @@ export class GestionEmployeComponent implements OnInit {
       lastName: emp.lastName || emp.last_name || '',
       phone: emp.phone || '',
       email: emp.email || '',
-      type: emp.type || 'instructor',
-      role: emp.role || 'secretaire' // Charge le rôle existant en mode édition
+      type: emp.type || 'instructor'
     };
   }
 
@@ -219,15 +162,8 @@ export class GestionEmployeComponent implements OnInit {
   }
 
   viewEmployee(emp: any) {
-  this.selectedEmployee = emp;
-  setTimeout(() => {
-    const modalElement = document.getElementById('viewEmployeModal');
-    if (modalElement) {
-      const modal = new (window as any).bootstrap.Modal(modalElement);
-      modal.show();
-    }
-  }, 0);
-}
+    this.selectedEmployee = emp;
+  }
 
   private handleSuccess(msg: string) {
     this.successMessage = msg;

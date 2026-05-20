@@ -68,16 +68,14 @@ export class NavbarComponent implements OnInit {
   }
 
   private loadSchoolInfo(): void {
-  this.schoolService.getAll().subscribe({
-    next: (response) => {
-      console.log('School response:', response); // Check this in browser DevTools
-      const schools = (response as any)?.records || (response as any)?.data || response;
-      if (schools && schools.length > 0) {
-        this.school = { ...schools[0] };
+    this.schoolService.getAll().subscribe({
+      next: (schools) => {
+        if (schools && schools.length > 0) {
+          this.school = { ...schools[0] };
+        }
       }
-    }
-  });
-}
+    });
+  }
 
   private openModal(targetId: string): void {
     const openModals = document.querySelectorAll('.modal.show');

@@ -74,10 +74,10 @@ export class GestionExamenComponent implements OnInit {
     const s = String(status).toLowerCase().trim();
 
     if (s.includes('réussi') || s.includes('reussi') || s.includes('success')) {
-      return 'Réussi';
+      return 'réussi';
     }
     if (s.includes('échoué') || s.includes('echoue') || s.includes('echec') || s.includes('failed')) {
-      return 'Échoué';
+      return 'échoué';
     }
     if (s.includes('en attente') || s.includes('pending')) {
       return 'En attente';

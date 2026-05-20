@@ -43,12 +43,9 @@ export class GestionPaiementComponent implements OnInit {
 
  loadPayments(): void {
   this.paymentService.getAll().subscribe({
-    /*next: (response: any) => {
+    next: (response: any) => {
       // The backend now provides 'resteALinstant'
-      this.payments = response.map((p: any) => ({*/
-      next: (response: any) => {
-  const data = Array.isArray(response) ? response : (response.payments || response.data || response.records || []);
-  this.payments = data.map((p: any) => ({
+      this.payments = response.map((p: any) => ({
         ...p,
         candidateName: this.getCandidateDisplay(p),
         // Use the backend's calculation

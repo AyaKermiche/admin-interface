@@ -270,55 +270,139 @@ export class PlanningComponent implements OnInit {
 
   // --- GESTION DES CLICS & MODALES ---
 
-  handleSlotClick(plan: any, jourLabel: string) {
-    if (!this.selectedCandidate) {
-      alert("Veuillez sélectionner un candidat dans la liste avant de réserver.");
-      return;
+handleSlotClick(plan: any, jourLabel: string) {
+  if (!this.selectedCandidate) {
+    alert("Veuillez sélectionner un candidat avant de réserver.");
+    return;
+  }
+
+  const idx = this.jours.indexOf(jourLabel);
+  if (idx === -1) return;
+
+  const dateBase = new Date(this.joursDates[idx]);
+
+  // === Récupération de l'heure du créneau cliqué ===
+  let startTimeStr = '';
+  
+  if (plan.startTime) startTimeStr = plan.startTime;
+  else if (plan.start_time) startTimeStr = plan.start_time;
+  else if (plan.StartTime) startTimeStr = plan.StartTime;
+
+  if (startTimeStr) {
+    // Prendre seulement les 5 premiers caractères (HH:mm)
+    const timePart = startTimeStr.toString().substring(0, 5);
+    const [hours, minutes] = timePart.split(':').map(Number);
+    
+    dateBase.setHours(hours, minutes || 0, 0, 0);
+  } else {
+    dateBase.setHours(9, 0, 0, 0); // heure par défaut si problème
+  }
+
+  this.sessionForm.startTime = this.formatDateForInput(dateBase);
+
+  // Fin = début + 1 heure
+  const dateFin = new Date(dateBase);
+  dateFin.setHours(dateFin.getHours() + 1);
+  this.sessionForm.endTime = this.formatDateForInput(dateFin);
+
+  // Reste des infos
+  this.sessionForm.instructorId = this.getSessionInstructorId(plan);
+  this.sessionForm.candidateId = this.selectedCandidate.id;
+  this.sessionForm.candidate_name = this.getDisplayName(this.selectedCandidate);
+  this.sessionForm.typeSession = this.normalizeTypeWork(this.getScheduleTypeWork(plan));
+
+  // Ouvrir le modal
+  const modalElem = document.getElementById('reservationModal');
+  if (modalElem) {
+    new bootstrap.Modal(modalElem).show();
+  }
+}
+onSessionClick(session: any) {
+  this.selectedSession = { ...session };
+
+  // === FORMATAGE IMPORTANT POUR datetime-local ===
+  if (this.selectedSession) {
+    let start = this.selectedSession.startTime || this.selectedSession.start_time;
+    let end = this.selectedSession.endTime || this.selectedSession.end_time;
+
+    if (start) {
+      this.selectedSession.startTime = this.formatDateForInput(new Date(start));
     }
-
-    const idx = this.jours.indexOf(jourLabel);
-    if (idx === -1) return;
-    const dateBase = new Date(this.joursDates[idx]);
-
-    const startString = this.getScheduleTime(plan, 'startTime');
-    const [hours, minutes] = startString.split(':').map(Number);
-    dateBase.setHours(hours, minutes, 0, 0);
-
-    this.sessionForm.startTime = this.formatDateForInput(dateBase);
-    const dateFin = new Date(dateBase);
-    dateFin.setHours(dateBase.getHours() + 1);
-    this.sessionForm.endTime = this.formatDateForInput(dateFin);
-
-    this.sessionForm.instructorId = this.getSessionInstructorId(plan);
-    this.sessionForm.candidateId = this.selectedCandidate.id;
-    this.sessionForm.candidate_name = this.getDisplayName(this.selectedCandidate);
-    this.sessionForm.typeSession = this.normalizeTypeWork(this.getScheduleTypeWork(plan));
-
-    const modalElem = document.getElementById('reservationModal');
-    if (modalElem) {
-      const modal = new bootstrap.Modal(modalElem);
-      modal.show();
+    if (end) {
+      this.selectedSession.endTime = this.formatDateForInput(new Date(end));
     }
   }
 
-  onSessionClick(session: any) {
-    this.selectedSession = { ...session };
-    this.isEditMode = false;
-    const modalElem = document.getElementById('detailsModal');
-    if (modalElem) {
-      const modal = new bootstrap.Modal(modalElem);
-      modal.show();
-    }
+  this.isEditMode = false;
+
+  const modalElem = document.getElementById('detailsModal');
+  if (modalElem) {
+    const modal = new bootstrap.Modal(modalElem);
+    modal.show();
   }
+}
+
 
   // --- ACTIONS API ---
 
-  saveSession() {
-    this.sessionService.create(this.sessionForm).subscribe(() => {
+ saveSession() {
+  this.sessionService.create(this.sessionForm).subscribe({
+    next: () => {
       this.loadPlanningData();
-      bootstrap.Modal.getInstance(document.getElementById('reservationModal')).hide();
-    });
+      bootstrap.Modal.getInstance(document.getElementById('reservationModal'))?.hide();
+      alert('✅ Séance réservée avec succès !');
+    },
+  error: (err) => {
+  const errorMsg = err.error?.message || err.message || '';
+  console.log("[DEBUG] Message reçu du serveur :", errorMsg);
+
+  if (errorMsg.toLowerCase().includes("code") || errorMsg.toLowerCase().includes("créneau")) {
+    
+    // 1. Fermer d'abord proprement la modale noire
+    const resModalElem = document.getElementById('reservationModal');
+    if (resModalElem) {
+      const resInstance = bootstrap.Modal.getInstance(resModalElem);
+      if (resInstance) resInstance.hide();
+    }
+
+    // 2. On attend 200ms (fin de l'animation de fermeture) avant d'ouvrir la rouge !
+    setTimeout(() => {
+      const errorModalElem = document.getElementById('codeRequiredModal');
+      if (errorModalElem) {
+        let errorInstance = bootstrap.Modal.getInstance(errorModalElem);
+        if (!errorInstance) {
+          errorInstance = new bootstrap.Modal(errorModalElem, {
+            backdrop: 'static',
+            keyboard: false
+          });
+        }
+        errorInstance.show(); // Là, elle va s'ouvrir sans bugger !
+      }
+    }, 200); // 200ms pour être totalement sécurisé
+
+  } else {
+    alert(errorMsg || 'Erreur lors de la réservation');
   }
+}
+  });
+ 
+}
+closeCodeRequiredModal() {
+  const errorModalElem = document.getElementById('codeRequiredModal');
+  if (errorModalElem) {
+    const errorInstance = bootstrap.Modal.getInstance(errorModalElem);
+    if (errorInstance) errorInstance.hide();
+  }
+
+  // Nettoyage forcé de sécurité pour éliminer le fond noir persistant
+  document.body.classList.remove('modal-open');
+  document.body.style.overflow = '';
+  document.body.style.paddingRight = '';
+
+  const backdrops = document.querySelectorAll('.modal-backdrop');
+  backdrops.forEach(backdrop => backdrop.remove());
+}
+// Cette fonction ferme la modale d'erreur ET supprime le fond noir bloquant
 
   updateSession() {
     this.sessionService.update(this.selectedSession.id, this.selectedSession).subscribe(() => {
@@ -396,4 +480,36 @@ export class PlanningComponent implements OnInit {
   }
 
   checkValidation() { this.isTimeValid = true; }
+  // ====================== VÉRIFICATION PHASE ======================
+private showCodeRequiredModal() {
+  // 1. FORCER la fermeture de la modale noire sans passer par l'instance Bootstrap qui bugge
+  const resModalElem = document.getElementById('reservationModal');
+  if (resModalElem) {
+    resModalElem.classList.remove('show');
+    resModalElem.style.display = 'none';
+    resModalElem.setAttribute('aria-hidden', 'true');
+  }
+
+  // 2. NETTOYER immédiatement le fond noir de la première modale
+  document.body.classList.remove('modal-open');
+  document.body.style.overflow = '';
+  document.body.style.paddingRight = '';
+  
+  const backdrops = document.querySelectorAll('.modal-backdrop');
+  backdrops.forEach(backdrop => backdrop.remove());
+
+  // 3. OUVRIR la modale rouge proprement après un mini-délai
+  setTimeout(() => {
+    const errorModalElem = document.getElementById('codeRequiredModal');
+    if (errorModalElem) {
+      const errorModal = new bootstrap.Modal(errorModalElem, {
+        backdrop: 'static',
+        keyboard: false
+      });
+      errorModal.show();
+    }
+  }, 100);
+}
+
+
 }
